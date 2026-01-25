@@ -1,13 +1,60 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <title>Projet Web & Géomatique</title>
-  <link rel="stylesheet" href="../css/style.css">
+  <meta charset="utf-8" />
+
+  <!--Titre de la page dans l’onglet du navigateur-->
+  <title>Prix du m² – DVF Île-de-France</title>
+  <!--Feuille de style Leaflet -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <!--Feuille de style de l'application-->
+  <link rel="stylesheet" href="./css/style.css" />
 </head>
 <body>
-  <h1>Projet E3 – Web et Géomatique</h1>
-  <script src="../js/script.js"></script>
+
+  <!--En-tête de l'application
+    ================================
+    - titre principal
+    - bouton d’affichage des transports
+  -->
+  <header>
+    <h1>Prix médian du m² – Île-de-France</h1>
+    <button id="toggle-transports">
+      🚆 Afficher les transports
+    </button>
+  </header>
+
+  <!-- Conteneur global ui
+    ================================
+    - panneau latéral + carte
+  -->
+  <div id="container">
+
+    <!--
+      Panneau latéral contenant :
+      - stats dynamiques
+      - détails selon le niveau d’exploration
+      au chargement : message d’aide
+    -->
+    <aside id="side-panel">
+      <h2>Île-de-France</h2>
+      <p>Survolez un département<br>Cliquez pour explorer</p>
+    </aside>
+
+    <!--Zone d’affichage de la carte Leaflet-->
+    <div id="map"></div>
+  </div>
+
+  <!-- biblitothèques
+    ================================
+    - Leaflet : rendu carto + interactions
+    - d3.js : utilisé pour calculs statistiques & quantiles
+    ================================
+  -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+
+  <!-- Point d'entrée de l'application-->
+  <script type="module" src="./js/main.js"></script>
 </body>
 </html>
-
