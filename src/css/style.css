@@ -1,0 +1,156 @@
+/* ========================================
+   RESET & BASE TYPO
+   ======================================== */
+
+/* 
+  On force la page à occuper toute la hauteur + 
+  on supprime les marges par défaut.
+  On définit une police système (rapide, lisible).
+*/
+html, body {
+  height: 100%;
+  margin: 0;
+  font-family: system-ui, sans-serif;
+}
+
+
+/* ========================================
+   HEADER (Titre + bouton transports)
+   ======================================== */
+
+header {
+  padding: 10px 16px;
+  border-bottom: 1px solid #ddd; /* léger séparateur visuel */
+}
+
+
+/* ========================================
+   LAYOUT PRINCIPAL (panneau + carte)
+   ======================================== */
+
+#container {
+  /* Mise en page horizontale (side-panel + map) */
+  display: flex;
+
+  /* Reste de l'écran après le header */
+  height: calc(100% - 56px);
+}
+
+
+/* Panneau latéral contenant les stats & détails */
+#side-panel {
+  width: 320px;           /* largeur fixe */
+  padding: 12px;
+  overflow-y: auto;       /* scroll si contenu trop long */
+  border-right: 1px solid #ddd;
+}
+
+
+/* Zone carte (Leaflet) = occupe tout l'espace restant */
+#map {
+  flex: 1;                /* expansion automatique */
+}
+
+
+/* ========================================
+   ELEMENTS DE CONTENU (UI)
+   ======================================== */
+
+/* Chiffre mis en avant (ex: prix, nb ventes) */
+.big-number {
+  font-size: 26px;
+  font-weight: 700;
+}
+
+
+/* ========================================
+   LÉGENDE (heatmap DVF)
+   ======================================== */
+
+.legend {
+  background: white;
+  padding: 6px 8px;
+  border-radius: 4px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+  font-size: 12px;
+}
+
+/* Barre colorée représentant le gradient de valeurs */
+.legend-bar {
+  width: 140px;    /* largeur affichée */
+  height: 12px;    /* hauteur affichée */
+  border-radius: 3px;
+  margin: 4px 0;
+}
+
+
+/* ========================================
+   TABLEAU DÉTAIL DES VENTES
+   ======================================== */
+
+.sales-table {
+  width: 100%;
+  border-collapse: collapse; /* évite les doubles bordures */
+}
+
+.sales-table th,
+.sales-table td {
+  border-bottom: 1px solid #eee;
+  padding: 6px;
+  font-size: 13px;
+}
+
+
+/* ========================================
+   ACCESSIBILITÉ TRANSPORTS
+   ======================================== */
+
+/* Conteneur du bloc transports dans le panneau */
+.accessibility {
+  margin-top: 1rem;
+}
+
+/* Alignement des badges par ligne + retour à la ligne */
+.access-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+
+/* ----- BADGES TRANSPORTS ----- */
+
+/* Style générique des badges (typographie & centrage) */
+.transport-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.8rem;
+  min-width: 28px;
+  height: 28px;
+  color: #fff;
+}
+
+/* Métro = rond plein */
+.transport-badge.metro {
+  background: var(--c); /* couleur dynamique */
+  border-radius: 50%;
+}
+
+/* RER / TRAIN = carré arrondi */
+.transport-badge.rer {
+  background: var(--c);
+  border-radius: 6px;
+}
+
+/* Tramway = style particulier avec T encadré */
+.transport-badge.tram {
+  color: var(--c);
+  background: transparent;
+  border-top: 3px solid var(--c);
+  border-bottom: 3px solid var(--c);
+  height: 26px;
+  padding: 0 6px;
+  font-weight: 800;
+}
