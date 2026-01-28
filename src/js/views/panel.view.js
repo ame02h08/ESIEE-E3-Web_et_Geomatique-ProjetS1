@@ -8,26 +8,23 @@ import { computeStats } from "../models/dvf.model.js";
 /**
  * Affiche le panneau latéral pour un **département**.
  *
- * - Affiche le nom du département
- * - Nombre total de ventes
- * - Prix médian au m²
- * - Répartition Appartements / Maisons
- * - Bloc d’accessibilité aux transports
+ * Avec indicateur de compatibilité si des filtres sont actifs
  *
  * @param {string} nom - Nom du département.
  * @param {{ ventes?: number, prixMedian?: number, apparts?: number, maisons?: number }} stats
- *        Statistiques agrégées du département (peuvent être partielles ou nulles).
- * @param {Object|Array|null} transports - Données de transport à proximité (GeoJSON, tableau de features ou null).
+ * @param {Object|Array|null} transports - Données de transport à proximité.
+ * @param {Object|null} compatibility - Score de compatibilité { score, ventesCorrespondantes, ventesTotal }
  */
-export function showDeptPanel(nom, stats, transports) {
-  // Récupère l'élément du panneau latéral.
+export function showDeptPanel(nom, stats, transports, compatibility = null) {
   const panel = document.getElementById("side-panel");
 
-  // Construction du contenu HTML :
-  // - On utilise l'opérateur `?.` pour éviter les erreurs si `stats` est null/undefined.
-  // - On remplace les valeurs manquantes par un tiret cadratin "—".
+  // Bloc de compatibilité
+  const compatibilityHTML = renderCompatibilityIndicator(compatibility);
+
   panel.innerHTML = `
     <h2>${nom}</h2>
+
+    ${compatibilityHTML}
 
     <p>Nombre total de ventes</p>
     <div class="big-number">${stats?.ventes ?? "—"}</div>
@@ -50,25 +47,24 @@ export function showDeptPanel(nom, stats, transports) {
 /**
  * Affiche le panneau latéral pour une **commune**.
  *
- * - Calcule les stats à partir de la liste brute des ventes.
- * - Affiche nombre de ventes, prix médian au m².
- * - Détail Appartements / Maisons (volume + prix au m²).
- * - Bloc d’accessibilité aux transports.
+ * Avec indicateur de compatibilité si des filtres sont actifs
  *
  * @param {string} nom - Nom de la commune.
  * @param {Array<Object>} ventes - Liste des mutations DVF pour la commune.
  * @param {Object|Array|null} transports - Données de transport à proximité.
+ * @param {Object|null} compatibility - Score de compatibilité
  */
-export function showCommunePanel(nom, ventes, transports) {
-  // On calcule les statistiques agrégées sur la base des ventes brutes.
+export function showCommunePanel(nom, ventes, transports, compatibility = null) {
   const stats = computeStats(ventes);
-
-  // Récupération du panneau latéral.
   const panel = document.getElementById("side-panel");
 
-  // Construction de l'HTML avec les statistiques calculées.
+  // Bloc de compatibilité
+  const compatibilityHTML = renderCompatibilityIndicator(compatibility);
+
   panel.innerHTML = `
     <h2>${nom}</h2>
+
+    ${compatibilityHTML}
 
     <p>Nombre total de ventes</p>
     <div class="big-number">${stats.ventes}</div>
@@ -93,29 +89,26 @@ export function showCommunePanel(nom, ventes, transports) {
 /**
  * Affiche le panneau latéral pour une **section cadastrale**.
  *
- * - Affiche le nom de la commune + code de section.
- * - Calcule et montre les stats sur les ventes de la section.
- * - Inclut l’accessibilité et le détail des ventes (tableau).
+ * Avec indicateur de compatibilité si des filtres sont actifs
  *
  * @param {string} nomCommune - Nom de la commune.
  * @param {string} sectionCode - Code de la section (ex: "AB").
  * @param {Array<Object>} ventes - Liste des ventes dans la section.
  * @param {Object|Array|null} transports - Données de transport à proximité.
+ * @param {Object|null} compatibility - Score de compatibilité
  */
-export function showSectionPanel(nomCommune, sectionCode, ventes, transports) {
-  // Sécurise le paramètre ventes (évite les erreurs si null/undefined).
+export function showSectionPanel(nomCommune, sectionCode, ventes, transports, compatibility = null) {
   const stats = computeStats(ventes || []);
-
-  // Récupération du panneau latéral.
   const panel = document.getElementById("side-panel");
 
-  // Construction du contenu avec :
-  // - un résumé (ventes / prix médian),
-  // - le bloc transports,
-  // - un tableau détaillé des ventes.
+  // Bloc de compatibilité
+  const compatibilityHTML = renderCompatibilityIndicator(compatibility);
+
   panel.innerHTML = `
     <h2>${nomCommune}</h2>
     <h3>Section ${sectionCode}</h3>
+
+    ${compatibilityHTML}
 
     <p>Nombre de ventes</p>
     <div class="big-number">${stats.ventes}</div>
@@ -130,46 +123,91 @@ export function showSectionPanel(nomCommune, sectionCode, ventes, transports) {
 }
 
 /* =====================================================
+    INDICATEUR DE COMPATIBILITÉ
+===================================================== */
+
+/**
+ * Génère le HTML de l'indicateur de compatibilité
+ * 
+ * @param {Object|null} compatibility - { score, ventesCorrespondantes, ventesTotal }
+ * @returns {string} HTML de l'indicateur ou chaîne vide
+ */
+function renderCompatibilityIndicator(compatibility) {
+  // Si pas de données de compatibilité, ne rien afficher
+  if (!compatibility || compatibility.score === null || compatibility.score === undefined) {
+    return '';
+  }
+
+  const { score, ventesCorrespondantes, ventesTotal } = compatibility;
+
+  // Si score = 100%, ne pas afficher (tous les biens correspondent)
+  if (score === 100) {
+    return '';
+  }
+
+  // Déterminer la classe CSS selon le score
+  let badgeClass = 'compat-none';
+  let icon = '✗';
+  let label = 'Aucune correspondance';
+
+  if (score === 0) {
+    badgeClass = 'compat-none';
+    icon = '✗';
+    label = 'Aucune correspondance';
+  } else if (score <= 30) {
+    badgeClass = 'compat-low';
+    icon = '~';
+    label = 'Faible compatibilité';
+  } else if (score <= 60) {
+    badgeClass = 'compat-medium';
+    icon = '✓';
+    label = 'Compatibilité moyenne';
+  } else if (score <= 80) {
+    badgeClass = 'compat-good';
+    icon = '✓';
+    label = 'Bonne compatibilité';
+  } else {
+    badgeClass = 'compat-high';
+    icon = '✓✓';
+    label = 'Excellente compatibilité';
+  }
+
+  return `
+    <div class="compatibility-indicator ${badgeClass}">
+      <div class="compat-header">
+        <span class="compat-icon">${icon}</span>
+        <span class="compat-label">${label}</span>
+      </div>
+      <div class="compat-score">${score}%</div>
+      <div class="compat-detail">${ventesCorrespondantes} / ${ventesTotal} ventes</div>
+    </div>
+  `;
+}
+
+/* =====================================================
    ACCESSIBILITÉ
 ===================================================== */
 
 /**
  * Normalise les données de transports dans un format exploitable.
  *
- * Accepte :
- * - `null` / `undefined` → []
- * - tableau de features → renvoyé tel quel
- * - GeoJSON FeatureCollection → use `.features`
- *
  * @param {null|undefined|Array|Object} transports - Données brutes.
  * @returns {Array<Object>} Tableau de features de transport.
  */
 function normalizeTransports(transports) {
-  // Aucun transport fourni → liste vide.
   if (!transports) return [];
-
-  // Si c'est déjà un tableau, on le renvoie tel quel.
   if (Array.isArray(transports)) return transports;
-
-  // Si c'est un objet GeoJSON avec une propriété `features`,
-  // on renvoie ce tableau.
   if (transports.features) return transports.features;
-
-  // Fallback : on ne sait pas gérer ce format → liste vide.
   return [];
 }
 
 /**
  * Construit une structure par mode de transport à partir des features.
  *
- * - Regroupe par type de mode (METRO, RER, TRAMWAY, TRAIN).
- * - Pour chaque mode, stocke un Map(ligne → couleur).
- *
  * @param {Array<Object>} transports - Liste normalisée de features.
  * @returns {{ METRO: Map<string,string>, RER: Map<string,string>, TRAMWAY: Map<string,string>, TRAIN: Map<string,string> }}
  */
 function buildAccessibility(transports) {
-  // Initialisation d'un dictionnaire de Maps par mode de transport.
   const result = {
     METRO: new Map(),
     RER: new Map(),
@@ -177,24 +215,14 @@ function buildAccessibility(transports) {
     TRAIN: new Map(),
   };
 
-  // Parcours de tous les points de transport.
   for (const f of transports) {
-    // Sécurisation de la lecture des propriétés.
     const p = f.properties || {};
-
-    // Mode en majuscules (ex: "METRO", "RER", "TRAMWAY", "TRAIN").
     const mode = (p.mode || "").toUpperCase();
-
-    // Numéro / nom de la ligne (ex: "1", "A", "T3a"...).
     const ligne = p.ligne;
-
-    // Couleur associée à la ligne (utilisée dans le badge).
     const couleur = p.couleur || "#999999";
 
-    // Si le mode n'est pas géré ou que la ligne est absente, on saute.
     if (!result[mode] || !ligne) continue;
 
-    // On ajoute la ligne dans la Map du mode si elle n'est pas déjà présente.
     if (!result[mode].has(ligne)) {
       result[mode].set(ligne, couleur);
     }
@@ -204,18 +232,16 @@ function buildAccessibility(transports) {
 }
 
 /**
- * Génère le HTML pour un bloc "mode de transport" (ex: Métro, RER…).
+ * Génère le HTML pour un bloc "mode de transport".
  *
  * @param {string} title - Titre affiché (ex: "🚇 Métro").
  * @param {Map<string,string>} map - Map(ligne → couleur).
- * @param {string} cssClass - Classe CSS pour styler les badges (ex: "metro", "rer", "tram").
+ * @param {string} cssClass - Classe CSS pour styler les badges.
  * @returns {string} HTML du bloc ou chaîne vide si aucune ligne.
  */
 function renderMode(title, map, cssClass) {
-  // Si aucune ligne pour ce mode, on ne rend rien.
   if (!map || map.size === 0) return "";
 
-  // On convertit la Map en tableau [ligne, couleur] et on trie par numéro/nom de ligne.
   const items = [...map.entries()]
     .sort(([a], [b]) => a.localeCompare(b, "fr", { numeric: true }))
     .map(
@@ -227,11 +253,6 @@ function renderMode(title, map, cssClass) {
     )
     .join("");
 
-  // On regroupe le tout dans un bloc de type :
-  // <div class="access-block">
-  //   <h4> Métro</h4>
-  //   <div class="access-list">[badges]</div>
-  // </div>
   return `
     <div class="access-block">
       <h4>${title}</h4>
@@ -243,30 +264,19 @@ function renderMode(title, map, cssClass) {
 /**
  * Construit le bloc "Accessibilité" complet pour le panneau.
  *
- * - Normalise les données de transport.
- * - Regroupe par mode.
- * - Génére un bloc HTML pour chaque mode (Métro, RER, Tramway, Train).
- * - Si aucun transport → message "Aucun transport à proximité".
- *
  * @param {null|undefined|Array|Object} transports - Données brutes.
  * @returns {string} HTML du bloc accessibilité.
  */
 function renderAccessibility(transports) {
-  // Normalisation en tableau de features.
   const list = normalizeTransports(transports);
-
-  // Construction de la structure par mode de transport.
   const acc = buildAccessibility(list);
 
-  // Concaténation des blocs par mode (certains pourront être vides).
   const html =
     renderMode("Métro", acc.METRO, "metro") +
     renderMode("RER", acc.RER, "rer") +
     renderMode("Tramway", acc.TRAMWAY, "tram") +
     renderMode("Train", acc.TRAIN, "rer");
 
-  // Si après concaténation il ne reste rien (pas de transports),
-  // on affiche un message par défaut.
   if (!html.trim()) {
     return `
       <section class="accessibility">
@@ -276,7 +286,6 @@ function renderAccessibility(transports) {
     `;
   }
 
-  // Sinon, on insère les blocs modes dans une section Accessibilité.
   return `
     <section class="accessibility">
       <h3>Accessibilité</h3>
@@ -292,19 +301,10 @@ function renderAccessibility(transports) {
 /**
  * Génère le HTML détaillé des ventes pour une section cadastrale.
  *
- * - Si aucune vente → message "Aucune vente".
- * - Sinon, tableau listant :
- *   - type de bien (Maison / Appartement / Bien)
- *   - surface
- *   - nombre de pièces
- *   - prix
- *   - date
- *
  * @param {Array<Object>} ventes - Liste brute des mutations DVF pour la section.
  * @returns {string} HTML du bloc "Détail des ventes".
  */
 function renderVentesDetails(ventes) {
-  // Cas sans ventes : on affiche simplement un message informatif.
   if (!ventes || ventes.length === 0) {
     return `
       <section class="sales-details">
@@ -314,56 +314,28 @@ function renderVentesDetails(ventes) {
     `;
   }
 
-  // Construction des lignes du tableau.
   const list = ventes
     .map((v, idx) => {
-      /* ---------- Type de bien : Maison / Appartement / fallback ---------- */
-
-      // Valeur par défaut
       let bien = "Bien";
-
-      // On essaie différents champs possibles :
-      // - code_type_local (1 = maison, 2 = appart)
-      // - type_local (texte)
-      // - type (éventuel champ déjà préparé en amont)
       const tl = v.code_type_local ?? v.type_local ?? v.type ?? null;
 
       if (tl !== null && tl !== undefined) {
-        // Cas DVF standard avec codes numériques 1 / 2.
         if (tl == 1 || tl === "1") {
           bien = "Maison";
         } else if (tl == 2 || tl === "2") {
           bien = "Appartement";
-        }
-        // Cas champ texte (ex: "Appartement", "Maison", "Dépendance", etc.)
-        else if (typeof tl === "string") {
+        } else if (typeof tl === "string") {
           const t = tl.toLowerCase();
           if (t.includes("appart")) bien = "Appartement";
           else if (t.includes("mais")) bien = "Maison";
-          else bien = tl; // on affiche tel quel si autre type
+          else bien = tl;
         }
       }
 
-      /* ---------- Surface ---------- */
-
-      // On tente plusieurs champs potentiels pour la surface bâtie.
       const surface = v.surface_reelle_bati || v.surface || v.surf || null;
-
-      /* ---------- Prix ---------- */
-
-      // Valeur foncière DVF ou équivalent interne.
       const prix = v.valeur_fonciere ?? v.prix ?? null;
-
-      /* ---------- Date ---------- */
-
-      // Date de mutation officielle ou fallback.
       const date = v.date_mutation || v.date || "";
-
-      /* ---------- Nombre de pièces ---------- */
-
       const pieces = v.nombre_pieces_principales ?? v.nb_pieces ?? null;
-
-      /* ---------- Construction de la ligne HTML ---------- */
 
       return `
       <tr>
@@ -378,7 +350,6 @@ function renderVentesDetails(ventes) {
     })
     .join("");
 
-  // Intégration des lignes dans un tableau complet avec en-têtes.
   return `
     <section class="sales-details">
       <h3>Détail des ventes (${ventes.length})</h3>

@@ -20,14 +20,18 @@ export async function loadDVF() {
       commune: d.code_commune, // code commune INSEE
       section: d.id_parcelle ? d.id_parcelle.slice(0, -4) : null, // section cadastrale
       type: d.type_local, // type de bien (Maison / Appartement)
+      type_local: d.type_local === "Maison" ? 1 : (d.type_local === "Appartement" ? 2 : null), 
       prix: valeur / surface, // prix au m²
-      valeur_fonciere: valeur,
+      valeur_fonciere: valeur, 
+      surface_reelle_bati: surface, 
       surface,
       nb_pieces: +d.nombre_pieces_principales || null,
+      nombre_pieces_principales: +d.nombre_pieces_principales || null, 
       date: d.date_mutation, // date de la transaction
+      date_mutation: d.date_mutation, 
       adresse: `${d.adresse_numero || ""} ${d.adresse_nom_voie || ""}`.trim(),
       code_postal: d.code_postal,
-    };
+    };  
   });
   // Le fichier étant propre, aucun filtrage supplémentaire n'est nécessaire
   return rows;
@@ -134,7 +138,8 @@ export function aggregateMedianByKey(data, key) {
 /**
  * Construit des index territoriaux pour accélérer les requêtes lors des clics utilisateur.
  *
- * Deux niveaux d'index sont générés :
+ * Trois niveaux d'index sont générés :
+ * - ventesByDept : Map(département → ventes)
  * - ventesByCommune : Map(commune → ventes)
  * - ventesBySection : Map(section → ventes)
  *
@@ -142,23 +147,33 @@ export function aggregateMedianByKey(data, key) {
  * et améliorent la fluidité lors de l'exploration multi-échelle.
  *
  * @param {Array<Object>} data - Ventes DVF.
- * @returns {{ ventesByCommune: Map, ventesBySection: Map }}
+ * @returns {{ ventesByDept: Map, ventesByCommune: Map, ventesBySection: Map }}
  */
 export function buildIndexes(data) {
+  const ventesByDept = new Map(); 
   const ventesByCommune = new Map();
   const ventesBySection = new Map();
 
-  // Insertion des ventes dans les deux index
+  // Insertion des ventes dans les trois index
   for (const v of data) {
+    // Index par département
+    if (v.dept) {
+      if (!ventesByDept.has(v.dept)) ventesByDept.set(v.dept, []);
+      ventesByDept.get(v.dept).push(v);
+    }
+    
+    // Index par commune
     if (v.commune) {
       if (!ventesByCommune.has(v.commune)) ventesByCommune.set(v.commune, []);
       ventesByCommune.get(v.commune).push(v);
     }
+    
+    // Index par section
     if (v.section) {
       if (!ventesBySection.has(v.section)) ventesBySection.set(v.section, []);
       ventesBySection.get(v.section).push(v);
     }
   }
 
-  return { ventesByCommune, ventesBySection };
+  return { ventesByDept, ventesByCommune, ventesBySection }; 
 }

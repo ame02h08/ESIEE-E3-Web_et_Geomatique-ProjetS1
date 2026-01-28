@@ -3,10 +3,17 @@
 <head>
   <meta charset="utf-8" />
 
-  <!--Titre de la page dans l’onglet du navigateur-->
-  <title>Prix du m² – DVF Île-de-France</title>
+  <!--Titre de la page dans l'onglet du navigateur-->
+  <title>IMMOVIZIDF – Prix du m² Île-de-France</title>
+
   <!--Feuille de style Leaflet -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+  <!-- Import Google Font Nunito -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+
   <!--Feuille de style de l'application-->
   <link rel="stylesheet" href="./css/style.css" />
 </head>
@@ -14,35 +21,211 @@
 
   <!--En-tête de l'application
     ================================
-    - titre principal
-    - bouton d’affichage des transports
+    - logo et titre principal centré (IMMOVIZIDF)
+    - sous-titre descriptif
+    - bouton d'affichage des transports
+    - bouton mode comparaison
+    - bouton pouvoir d'achat
   -->
   <header>
-    <h1>Prix médian du m² – Île-de-France</h1>
-    <button id="toggle-transports">
-      🚆 Afficher les transports
-    </button>
+    <div class="header-content">
+      <!-- Logo et titre centrés -->
+      <div class="header-title-section">
+        <h1 class="app-title">
+          IMMOVIZ<span class="title-subscript">IDF</span>
+        </h1>
+        <p class="app-subtitle">Prix médian du m² – Île-de-France</p>
+      </div>
+
+      <!-- Boutons d'action -->
+      <div class="header-buttons">
+        <button id="toggle-transports">
+           Afficher les transports
+        </button>
+        <button id="toggle-comparison-mode" class="btn-comparison-mode">
+           Mode Comparaison : <span id="comparison-mode-status">OFF</span>
+        </button>
+        <button id="toggle-pouvoir-achat" class="btn-pouvoir-achat">
+           Pouvoir d'achat
+        </button>
+      </div>
+    </div>
   </header>
 
   <!-- Conteneur global ui
     ================================
-    - panneau latéral + carte
+    - panneau latéral + carte + panneau de filtres + panneau de comparaison
   -->
   <div id="container">
 
     <!--
       Panneau latéral contenant :
       - stats dynamiques
-      - détails selon le niveau d’exploration
-      au chargement : message d’aide
+      - détails selon le niveau d'exploration
+      au chargement : message d'aide
     -->
     <aside id="side-panel">
       <h2>Île-de-France</h2>
       <p>Survolez un département<br>Cliquez pour explorer</p>
     </aside>
 
-    <!--Zone d’affichage de la carte Leaflet-->
+    <!--
+      Panneau de filtrage
+      ================================
+      Permet de filtrer les territoires affichés selon :
+      - budget maximum
+      - surface minimale
+      - type de bien (maison / appartement)
+      - présence de transport
+    -->
+    <aside id="filters-panel">
+      <h3> Filtres</h3>
+
+      <!-- Filtre Budget -->
+      <div class="filter-group">
+        <label for="filter-budget">Budget max (€)</label>
+        <input 
+          type="number" 
+          id="filter-budget" 
+          placeholder="ex: 500000"
+          min="0"
+          step="10000"
+        >
+      </div>
+
+      <!-- Filtre Surface -->
+      <div class="filter-group">
+        <label for="filter-surface">Surface min (m²)</label>
+        <input 
+          type="number" 
+          id="filter-surface" 
+          placeholder="ex: 50"
+          min="0"
+          step="5"
+        >
+      </div>
+
+      <!-- Filtre Type de bien -->
+      <div class="filter-group">
+        <label for="filter-type">Type de bien</label>
+        <select id="filter-type">
+          <option value="">Tous</option>
+          <option value="1">Maison</option>
+          <option value="2">Appartement</option>
+        </select>
+      </div>
+
+      <!-- Filtre Transport -->
+      <div class="filter-group">
+        <label class="checkbox-label">
+          <input type="checkbox" id="filter-transport">
+          <span>Uniquement zones avec transport</span>
+        </label>
+      </div>
+
+      <!-- Boutons d'action -->
+      <div class="filter-actions">
+        <button id="apply-filters" class="btn-primary">
+          ✓ Appliquer
+        </button>
+        <button id="reset-filters" class="btn-secondary">
+          ✕ Réinitialiser
+        </button>
+      </div>
+    </aside>
+
+    <!--
+      Panneau de comparaison
+      ================================
+      Permet de sélectionner jusqu'à 3 zones pour comparaison
+      Affiche les zones sélectionnées sous forme d'étiquettes
+    -->
+    <aside id="comparison-panel">
+      <div class="comparison-header">
+        <h3>Comparaison (<span id="comparison-count">0</span>/3)</h3>
+        <button id="close-comparison" class="btn-close" title="Replier/Déplier">×</button>
+      </div>
+      
+      <div id="comparison-content">
+        <p class="comparison-info">
+          ℹ️ Activez le <strong>Mode Comparaison</strong> puis cliquez sur 3 zones (départements, communes ou sections) à comparer.
+        </p>
+        
+        <!-- Liste des zones sélectionnées -->
+        <div id="comparison-tags"></div>
+        
+        <!-- Bouton de validation -->
+        <button id="validate-comparison" class="btn-validate" disabled>
+          ✓ Valider la comparaison
+        </button>
+      </div>
+    </aside>
+
+    <!--Zone d'affichage de la carte Leaflet-->
     <div id="map"></div>
+  </div>
+
+  <!--
+    Tableau de comparaison
+    ================================
+    Affiché en dessous de la carte après validation
+  -->
+  <div id="comparison-table-container" class="hidden">
+    <div class="comparison-table-header">
+      <h2>Résultat de la comparaison</h2>
+      <button id="close-comparison-table" class="btn-close-table">✕ Fermer</button>
+    </div>
+    <div id="comparison-table-content"></div>
+  </div>
+
+  <!--
+    Tableau de résultats Pouvoir d'Achat
+    ================================
+    Affiché en dessous du tableau de comparaison après analyse.
+    Montre le top 5 des zones (communes ou sections) où l'utilisateur
+    peut acheter le plus de surface avec son budget.
+  -->
+  <div id="pouvoir-achat-results" class="hidden">
+    <div class="pouvoir-achat-header">
+      <h2>Top 5 des meilleurs endroits pour votre budget</h2>
+      <p class="budget-display">Budget : <span id="budget-display-value">—</span></p>
+      <button id="close-pouvoir-achat-results" class="btn-close-table">✕ Fermer</button>
+    </div>
+    <div id="pouvoir-achat-content"></div>
+  </div>
+
+  <!--
+    Modal Pouvoir d'Achat
+    ================================
+    Fenêtre modale pour saisir le budget d'analyse.
+    L'utilisateur entre son budget et lance l'analyse pour découvrir
+    où il peut acheter le plus de surface en Île-de-France.
+  -->
+  <div id="pouvoir-achat-modal" class="modal hidden">
+    <div class="modal-content modal-pouvoir-achat">
+      <h3>Analyse de Pouvoir d'Achat</h3>
+      <p>Entrez votre budget pour découvrir où vous pouvez acheter en Île-de-France</p>
+      
+      <div class="input-group">
+        <label for="budget-pouvoir-achat">Budget d'achat (€)</label>
+        <input 
+          type="number" 
+          id="budget-pouvoir-achat" 
+          placeholder="ex: 350000"
+          min="50000"
+          step="10000"
+        >
+      </div>
+
+      <div class="modal-actions">
+        <button id="analyser-pouvoir-achat" class="btn-primary">
+          Analyser
+        </button>
+        <button id="cancel-pouvoir-achat" class="btn-secondary">
+          Annuler
+        </button>
+      </div>
+    </div>
   </div>
 
   <!-- biblitothèques

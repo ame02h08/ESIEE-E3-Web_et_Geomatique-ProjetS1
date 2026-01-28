@@ -2,25 +2,150 @@
    RESET & BASE TYPO
    ======================================== */
 
-/* 
-  On force la page à occuper toute la hauteur + 
-  on supprime les marges par défaut.
-  On définit une police système (rapide, lisible).
-*/
 html, body {
   height: 100%;
   margin: 0;
-  font-family: system-ui, sans-serif;
+  font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
-
 /* ========================================
-   HEADER (Titre + bouton transports)
+   HEADER 
    ======================================== */
 
 header {
-  padding: 10px 16px;
-  border-bottom: 1px solid #ddd; /* léger séparateur visuel */
+  background: #E4002B;
+  padding: 20px 30px;
+  border-bottom: none;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.header-content {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 20px;
+  width: 100%;
+  padding: 0 30px;
+}
+
+/* Section titre et sous-titre centrés */
+.header-title-section {
+  text-align: center;
+  width: 100%;
+}
+
+/* Logo principal IMMOVIZ avec IDF en indice */
+.app-title {
+  font-size: 2.8em;
+  font-weight: 700;
+  color: white;
+  margin: 0;
+  letter-spacing: 1px;
+  line-height: 1;
+}
+
+/* IDF en indice (subscript) avec taille réduite */
+.title-subscript {
+  font-size: 0.5em;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+  vertical-align: sub;
+  margin-left: 2px;
+}
+
+/* Sous-titre descriptif léger */
+.app-subtitle {
+  font-size: 1em;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.95);
+  margin: 8px 0 0 0;
+  letter-spacing: 0.3px;
+}
+
+/* Conteneur des boutons d'action alignés à gauche */
+.header-buttons {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  width: 100%;
+}
+
+/* Style unifié pour tous les boutons du header */
+#toggle-transports,
+.btn-comparison-mode,
+.btn-pouvoir-achat {
+  background: white;
+  color: #333;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-size: 0.95em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+#toggle-transports:hover,
+.btn-comparison-mode:hover,
+.btn-pouvoir-achat:hover {
+  background: #f5f5f5;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+/* Mode Comparaison actif : fond rouge SeLoger */
+.btn-comparison-mode.active {
+  background: #C9002B;
+  color: white;
+  border: none;
+}
+
+.btn-comparison-mode.active:hover {
+  background: #B00025;
+}
+
+/* Badge ON/OFF dans le bouton Mode Comparaison */
+#comparison-mode-status {
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: rgba(0,0,0,0.15);
+  font-size: 0.9em;
+}
+
+.btn-comparison-mode.active #comparison-mode-status {
+  background: rgba(255,255,255,0.25);
+}
+
+/* Responsive : adaptation mobile */
+@media (max-width: 768px) {
+  .app-title {
+    font-size: 2em;
+  }
+  
+  .app-subtitle {
+    font-size: 0.9em;
+  }
+  
+  .header-buttons {
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  #toggle-transports,
+  .btn-comparison-mode,
+  .btn-pouvoir-achat {
+    width: 100%;
+    justify-content: center;
+  }
 }
 
 
@@ -29,98 +154,149 @@ header {
    ======================================== */
 
 #container {
-  /* Mise en page horizontale (side-panel + map) */
   display: flex;
-
-  /* Reste de l'écran après le header */
   height: calc(100% - 56px);
 }
 
+/* ========================================
+   SIDE PANEL 
+   ======================================== */
 
-/* Panneau latéral contenant les stats & détails */
+/* Panneau latéral gauche avec fond blanc style SeLoger */
 #side-panel {
-  width: 320px;           /* largeur fixe */
-  padding: 12px;
-  overflow-y: auto;       /* scroll si contenu trop long */
-  border-right: 1px solid #ddd;
-}
-
-
-/* Zone carte (Leaflet) = occupe tout l'espace restant */
-#map {
-  flex: 1;                /* expansion automatique */
-}
-
-
-/* ========================================
-   ELEMENTS DE CONTENU (UI)
-   ======================================== */
-
-/* Chiffre mis en avant (ex: prix, nb ventes) */
-.big-number {
-  font-size: 26px;
-  font-weight: 700;
-}
-
-
-/* ========================================
-   LÉGENDE (heatmap DVF)
-   ======================================== */
-
-.legend {
+  width: 320px;
+  padding: 20px;
+  overflow-y: auto;
   background: white;
-  padding: 6px 8px;
-  border-radius: 4px;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.3);
-  font-size: 12px;
+  border-right: 1px solid #e0e0e0;
+  box-shadow: 2px 0 6px rgba(0,0,0,0.05);
 }
 
-/* Barre colorée représentant le gradient de valeurs */
-.legend-bar {
-  width: 140px;    /* largeur affichée */
-  height: 12px;    /* hauteur affichée */
-  border-radius: 3px;
-  margin: 4px 0;
+/* Titre principal du département/commune/section */
+#side-panel h2 {
+  font-size: 1.5em;
+  font-weight: 800;
+  color: #333;
+  margin: 0 0 20px 0;
+  padding-bottom: 15px;
+  border-bottom: 3px solid #E4002B;
 }
 
-
-/* ========================================
-   TABLEAU DÉTAIL DES VENTES
-   ======================================== */
-
-.sales-table {
-  width: 100%;
-  border-collapse: collapse; /* évite les doubles bordures */
+/* Message d'aide initial */
+#side-panel p {
+  font-size: 0.95em;
+  color: #666;
+  line-height: 1.6;
 }
 
-.sales-table th,
-.sales-table td {
-  border-bottom: 1px solid #eee;
-  padding: 6px;
-  font-size: 13px;
+/* Section statistiques principales */
+.stats-section {
+  margin-bottom: 25px;
+  padding: 15px;
+  background: #f9f9f9;
+  border-radius: 8px;
+  border-left: 4px solid #E4002B;
 }
 
+/* Label des statistiques */
+.stats-section > div:first-child,
+#side-panel > div:not(.accessibility):not(.stats-section) {
+  margin-bottom: 20px;
+}
 
-/* ========================================
-   ACCESSIBILITÉ TRANSPORTS
-   ======================================== */
+/* Labels de données */
+#side-panel > div > p:first-child,
+#side-panel > p:first-of-type:not(:only-of-type) {
+  font-size: 0.85em;
+  font-weight: 600;
+  color: #666;
+  margin: 0 0 5px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
 
-/* Conteneur du bloc transports dans le panneau */
+/* Valeurs principales (prix, nombre de ventes) */
+.big-number {
+  font-size: 2em;
+  font-weight: 800;
+  color: #E4002B;
+  margin: 5px 0 15px 0;
+  line-height: 1;
+}
+
+/* Valeurs normales */
+#side-panel > div > p:last-child:not(.big-number) {
+  font-size: 1em;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 5px 0;
+}
+
+/* Section détail des ventes */
+#side-panel h3 {
+  font-size: 1em;
+  font-weight: 700;
+  color: #333;
+  margin: 20px 0 10px 0;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+/* Sous-sections (Appartements, Maisons) */
+#side-panel > div {
+  margin-bottom: 15px;
+}
+
+#side-panel > div > strong,
+#side-panel strong {
+  display: block;
+  font-size: 0.9em;
+  font-weight: 600;
+  color: #555;
+  margin-bottom: 4px;
+}
+
+#side-panel > div > span,
+#side-panel > span {
+  font-size: 0.95em;
+  color: #333;
+  font-weight: 600;
+}
+
+/* Section Accessibilité */
 .accessibility {
-  margin-top: 1rem;
+  margin-top: 25px;
+  padding: 15px;
+  background: #f9f9f9;
+  border-radius: 8px;
+  border-left: 4px solid #2196F3;
 }
 
-/* Alignement des badges par ligne + retour à la ligne */
+.accessibility h3,
+.accessibility > p:first-child {
+  font-size: 1.1em;
+  font-weight: 700;
+  color: #333;
+  margin: 0 0 15px 0;
+}
+
+/* Sous-titres transport (RER, Métro, Tram, Train) */
+.accessibility > p:not(:first-child) {
+  font-size: 0.85em;
+  font-weight: 700;
+  color: #555;
+  margin: 12px 0 6px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
 .access-list {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
+  margin-bottom: 15px;
 }
 
-
-/* ----- BADGES TRANSPORTS ----- */
-
-/* Style générique des badges (typographie & centrage) */
 .transport-badge {
   display: inline-flex;
   align-items: center;
@@ -132,19 +308,19 @@ header {
   color: #fff;
 }
 
-/* Métro = rond plein */
+/* Badge rond pour les métros */
 .transport-badge.metro {
-  background: var(--c); /* couleur dynamique */
+  background: var(--c);
   border-radius: 50%;
 }
 
-/* RER / TRAIN = carré arrondi */
+/* Badge carré arrondi pour les RER */
 .transport-badge.rer {
   background: var(--c);
   border-radius: 6px;
 }
 
-/* Tramway = style particulier avec T encadré */
+/* Badge avec bordures pour les tramways */
 .transport-badge.tram {
   color: var(--c);
   background: transparent;
@@ -153,4 +329,1042 @@ header {
   height: 26px;
   padding: 0 6px;
   font-weight: 800;
+}
+
+/* Séparateur visuel entre sections */
+#side-panel hr {
+  border: none;
+  border-top: 1px solid #e0e0e0;
+  margin: 20px 0;
+}
+
+/* Tableau détail des ventes */
+.sales-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+.sales-table th,
+.sales-table td {
+  border-bottom: 1px solid #e0e0e0;
+  padding: 8px 6px;
+  font-size: 0.85em;
+  text-align: left;
+}
+
+.sales-table th {
+  background: #f5f5f5;
+  font-weight: 600;
+  color: #555;
+  text-transform: uppercase;
+  font-size: 0.75em;
+  letter-spacing: 0.5px;
+}
+
+.sales-table td {
+  color: #333;
+}
+
+/* Scrollbar personnalisée pour le side panel */
+#side-panel::-webkit-scrollbar {
+  width: 8px;
+}
+
+#side-panel::-webkit-scrollbar-track {
+  background: #f5f5f5;
+}
+
+#side-panel::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 4px;
+}
+
+#side-panel::-webkit-scrollbar-thumb:hover {
+  background: #999;
+}
+
+#map {
+  flex: 1;
+}
+
+
+/* ========================================
+   ELEMENTS DE CONTENU (UI)
+   ======================================== */
+
+.big-number {
+  font-size: 26px;
+  font-weight: 700;
+  color: #333;
+}
+
+
+/* ========================================
+   LÉGENDE (heatmap DVF)
+   ======================================== */
+
+.legend {
+  background: white;
+  padding: 8px 10px;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  font-size: 12px;
+  border: 1px solid #e0e0e0;
+}
+
+.legend-bar {
+  width: 140px;
+  height: 12px;
+  border-radius: 3px;
+  margin: 4px 0;
+}
+
+
+/* ========================================
+   TABLEAU DÉTAIL DES VENTES
+   ======================================== */
+
+.sales-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.sales-table th,
+.sales-table td {
+  border-bottom: 1px solid #e0e0e0;
+  padding: 8px 6px;
+  font-size: 13px;
+}
+
+.sales-table th {
+  background: #f5f5f5;
+  font-weight: 600;
+  color: #333;
+}
+
+
+/* ========================================
+   ACCESSIBILITÉ TRANSPORTS
+   ======================================== */
+
+.accessibility {
+  margin-top: 1rem;
+  padding: 12px;
+  background: #f9f9f9;
+  border-radius: 6px;
+}
+
+.access-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.transport-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.8rem;
+  min-width: 28px;
+  height: 28px;
+  color: #fff;
+}
+
+/* Badge rond pour les métros */
+.transport-badge.metro {
+  background: var(--c);
+  border-radius: 50%;
+}
+
+/* Badge carré arrondi pour les RER */
+.transport-badge.rer {
+  background: var(--c);
+  border-radius: 6px;
+}
+
+/* Badge avec bordures pour les tramways */
+.transport-badge.tram {
+  color: var(--c);
+  background: transparent;
+  border-top: 3px solid var(--c);
+  border-bottom: 3px solid var(--c);
+  height: 26px;
+  padding: 0 6px;
+  font-weight: 800;
+}
+
+
+/* ========================================
+   PANNEAU DE FILTRES 
+   ======================================== */
+
+/* Panneau fixe en haut à droite - version compacte et responsive */
+#filters-panel {
+  position: absolute;
+  top: 200px;
+  right: 20px;
+  background: white;
+  padding: 15px; 
+  border-radius: 6px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+  width: 240px; 
+  max-width: calc(100vw - 40px);
+  z-index: 1000;
+  border: 1px solid #e0e0e0;
+}
+
+/* Titre du panneau de filtres */
+#filters-panel h3 {
+  margin-top: -5px;
+  margin-bottom: 12px; 
+  font-size: 0.95em; 
+  color: #333;
+  font-weight: 700;
+}
+
+.filter-group {
+  margin-bottom: 12px; 
+}
+
+.filter-group label {
+  display: block;
+  margin-bottom: 4px; 
+  font-weight: 500;
+  color: #555;
+  font-size: 0.8em; 
+}
+
+.filter-group input[type="number"],
+.filter-group select {
+  width: 100%;
+  padding: 8px; 
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background: white;
+  box-sizing: border-box;
+  font-size: 0.85em; 
+  transition: border-color 0.3s;
+}
+
+.filter-group input[type="number"]:focus,
+.filter-group select:focus {
+  outline: none;
+  border-color: #E4002B;
+}
+
+/* Style pour la checkbox */
+.filter-group .checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  font-size: 0.8em; 
+  color: #555;
+}
+
+.filter-group input[type="checkbox"] {
+  cursor: pointer;
+  width: 16px;
+  height: 16px;
+}
+
+.filter-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 12px; 
+}
+
+/* Bouton rouge SeLoger pour appliquer les filtres - plus compact */
+#apply-filters, #reset-filters {
+  flex: 1;
+  padding: 9px; 
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.8em; 
+  transition: all 0.3s;
+}
+
+#apply-filters {
+  background: #E4002B;
+  color: white;
+}
+
+#apply-filters:hover {
+  background: #C9002B;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(228, 0, 43, 0.3);
+}
+
+/* Bouton gris pour réinitialiser les filtres */
+#reset-filters {
+  background: #f5f5f5;
+  color: #333;
+}
+
+#reset-filters:hover {
+  background: #e0e0e0;
+}
+
+
+/* =====================================================
+   PANNEAU DE COMPARAISON 
+===================================================== */
+
+/* Panneau fixe en bas à droite - version compacte et responsive */
+#comparison-panel {
+  position: absolute;
+  top: 560px;
+  right: 20px;
+  background: white;
+  padding: 0;
+  border-radius: 6px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+  width: 320px;
+  max-width: calc(100vw - 40px);
+  z-index: 1000;
+  transition: all 0.3s ease;
+  border: 1px solid #e0e0e0;
+}
+
+#comparison-panel.collapsed {
+  height: auto;
+}
+
+/* Header cliquable pour replier/déplier le panneau */
+.comparison-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+  border-bottom: 1px solid #e0e0e0;
+  background: #f9f9f9;
+  border-radius: 6px 6px 0 0;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+#comparison-panel.collapsed .comparison-header {
+  border-bottom: none;
+  border-radius: 6px;
+}
+
+.comparison-header:hover {
+  background: #f5f5f5;
+}
+
+.comparison-header h3 {
+  margin: 0;
+  font-size: 0.95em;
+  color: #333;
+  font-weight: 700;
+}
+
+/* Bouton fermer/ouvrir avec rotation */
+.btn-close {
+  background: white;
+  color: #666;
+  border: 1px solid #ddd;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s;
+  transform: rotate(0deg);
+}
+
+.btn-close:hover {
+  background: #E4002B;
+  color: white;
+  border-color: #E4002B;
+}
+
+/* Rotation du bouton quand le panneau est replié */
+#comparison-panel.collapsed .btn-close {
+  transform: rotate(45deg);
+  background: #E4002B;
+  color: white;
+  border-color: #E4002B;
+}
+
+#comparison-panel.collapsed .btn-close:hover {
+  background: #C9002B;
+  border-color: #C9002B;
+}
+
+#comparison-content {
+  max-height: 350px;
+  overflow-y: auto;
+  padding: 12px;
+  transition: all 0.3s ease;
+}
+
+#comparison-panel.collapsed #comparison-content {
+  display: none;
+}
+
+/* Message d'information */
+.comparison-info {
+  background: #f0f8ff;
+  padding: 8px 10px;
+  border-radius: 4px;
+  font-size: 0.75em;
+  line-height: 1.3;
+  color: #1565c0;
+  margin-bottom: 10px;
+  border-left: 3px solid #2196F3;
+}
+
+.comparison-info strong {
+  font-weight: 600;
+}
+
+/* Conteneur des étiquettes de zones sélectionnées */
+#comparison-tags {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap; /* Permet le retour à la ligne si nécessaire */
+  gap: 6px;
+  margin-bottom: 10px;
+  min-height: 30px;
+  align-items: flex-start;
+}
+
+/* Message affiché quand aucune zone n'est sélectionnée */
+#comparison-tags:empty::after {
+  content: "Aucune zone sélectionnée";
+  color: #999;
+  font-style: italic;
+  text-align: center;
+  display: block;
+  padding: 10px;
+  font-size: 0.8em;
+  width: 100%;
+}
+
+/* Étiquette pour chaque zone sélectionnée */
+.comparison-tag {
+  background: #f9f9f9;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  padding: 6px 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s;
+  width: auto;
+  max-width: 100%;
+}
+
+.comparison-tag:hover {
+  background: #f5f5f5;
+  border-color: #ccc;
+}
+
+.tag-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+/* Nom de la zone en gras - plus compact */
+.tag-name {
+  font-weight: 600;
+  font-size: 0.8em;
+  color: #333;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 180px;
+}
+
+/* Type de zone en italique - plus compact */
+.tag-type {
+  font-size: 0.65em;
+  color: #777;
+  font-style: italic;
+  white-space: nowrap;
+}
+
+/* Bouton pour retirer une zone de la sélection - plus compact */
+.tag-remove {
+  background: #E4002B;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  font-size: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.3s;
+  flex-shrink: 0;
+}
+
+.tag-remove:hover {
+  background: #C9002B;
+}
+
+/* Bouton de validation de la comparaison - plus compact */
+.btn-validate {
+  width: 100%;
+  padding: 10px;
+  background: #E4002B;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.85em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.btn-validate:hover:not(:disabled) {
+  background: #C9002B;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(228, 0, 43, 0.3);
+}
+
+/* État désactivé quand moins de 2 zones sélectionnées */
+.btn-validate:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* =====================================================
+   TABLEAU DE COMPARAISON SOUS LA CARTE
+===================================================== */
+
+/* Conteneur du tableau affiché sous la carte avec fond blanc */
+#comparison-table-container {
+  background: white;
+  border-top: 3px solid #E4002B;
+  box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+  transition: all 0.3s;
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+#comparison-table-container.hidden {
+  display: none;
+}
+
+.comparison-table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 30px;
+  background: #f9f9f9;
+  border-bottom: 1px solid #e0e0e0;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.comparison-table-header h2 {
+  margin: 0;
+  font-size: 1.4em;
+  color: #333;
+  font-weight: 700;
+}
+
+/* Bouton fermer le tableau */
+.btn-close-table {
+  background: #E4002B;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 20px;
+  font-size: 0.95em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.btn-close-table:hover {
+  background: #C9002B;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(228, 0, 43, 0.3);
+}
+
+/* Contenu du tableau avec fond blanc pour lisibilité */
+#comparison-table-content {
+  padding: 30px;
+  background: white;
+}
+
+#comparison-result-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+#comparison-result-table th,
+#comparison-result-table td {
+  padding: 15px 12px;
+  text-align: left;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+#comparison-result-table th {
+  background: #f5f5f5;
+  font-weight: 600;
+  font-size: 1em;
+  color: #333;
+}
+
+/* Première colonne : critères de comparaison */
+#comparison-result-table td:first-child {
+  font-weight: 600;
+  background: #fafafa;
+  width: 180px;
+  color: #555;
+}
+
+#comparison-result-table td {
+  text-align: center;
+  color: #333;
+}
+
+/* Badges de transport dans le tableau */
+.transport-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  justify-content: center;
+}
+
+.transport-badge-small {
+  display: inline-block;
+  padding: 3px 7px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  color: white;
+}
+
+.transport-badge-small.metro {
+  background: var(--c, #1e88e5);
+}
+
+.transport-badge-small.rer {
+  background: var(--c, #f44336);
+}
+
+.transport-badge-small.tram {
+  background: var(--c, #4caf50);
+}
+
+
+/* =====================================================
+   INDICATEUR DE COMPATIBILITÉ
+===================================================== */
+
+/* Indicateur affiché dans le panneau latéral */
+.compatibility-indicator {
+  background: #f9f9f9;
+  border-left: 4px solid;
+  padding: 12px 15px;
+  margin: 15px 0;
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Compatibilité haute : vert */
+.compatibility-indicator.compat-high {
+  background: #e8f5e9;
+  border-color: #4caf50;
+}
+
+/* Compatibilité bonne : vert clair */
+.compatibility-indicator.compat-good {
+  background: #f1f8e9;
+  border-color: #8bc34a;
+}
+
+/* Compatibilité moyenne : orange */
+.compatibility-indicator.compat-medium {
+  background: #fff3e0;
+  border-color: #ff9800;
+}
+
+/* Compatibilité faible : rouge */
+.compatibility-indicator.compat-low {
+  background: #ffebee;
+  border-color: #f44336;
+}
+
+/* Aucune compatibilité : gris */
+.compatibility-indicator.compat-none {
+  background: #f5f5f5;
+  border-color: #999;
+}
+
+.compat-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.compat-icon {
+  font-size: 1.4em;
+  font-weight: bold;
+}
+
+.compat-high .compat-icon,
+.compat-good .compat-icon {
+  color: #4caf50;
+}
+
+.compat-medium .compat-icon {
+  color: #ff9800;
+}
+
+.compat-low .compat-icon,
+.compat-none .compat-icon {
+  color: #f44336;
+}
+
+.compat-label {
+  font-weight: 600;
+  font-size: 0.95em;
+  flex: 1;
+  color: #555;
+}
+
+/* Score de compatibilité en grand */
+.compat-score {
+  font-size: 1.8em;
+  font-weight: 700;
+  color: #E4002B;
+  text-align: center;
+}
+
+/* Détail du score en petit et italique */
+.compat-detail {
+  font-size: 0.85em;
+  color: #777;
+  font-style: italic;
+  text-align: center;
+}
+
+
+/* =====================================================
+   MODAL DE BASE
+===================================================== */
+
+/* Overlay plein écran pour les modales */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  animation: fadeIn 0.3s;
+}
+
+.modal.hidden {
+  display: none;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Contenu de la modale avec animation d'entrée */
+.modal-content {
+  background: white;
+  padding: 30px;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  max-width: 400px;
+  width: 90%;
+  animation: slideIn 0.3s;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(-50px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.modal-content h3 {
+  margin: 0 0 10px 0;
+  font-size: 1.4em;
+  color: #333;
+  font-weight: 700;
+}
+
+.modal-content p {
+  margin: 0 0 25px 0;
+  font-size: 0.95em;
+  color: #666;
+  line-height: 1.5;
+}
+
+/* Conteneur des boutons d'action de la modale */
+.modal-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.modal-actions button {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 6px;
+  font-size: 1em;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-weight: 600;
+}
+
+/* Bouton primaire rouge SeLoger (validation) */
+.btn-primary {
+  background: #E4002B;
+  color: white;
+}
+
+.btn-primary:hover {
+  background: #C9002B;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(228, 0, 43, 0.4);
+}
+
+/* Bouton secondaire gris (annulation) */
+.btn-secondary {
+  background: #f5f5f5;
+  color: #333;
+}
+
+.btn-secondary:hover {
+  background: #e0e0e0;
+}
+
+
+/* =====================================================
+   MODAL POUVOIR D'ACHAT
+===================================================== */
+
+.modal-pouvoir-achat {
+  max-width: 500px;
+}
+
+.input-group {
+  margin-bottom: 25px;
+}
+
+.input-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #333;
+}
+
+/* Champ de saisie du budget */
+.input-group input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 1.1em;
+  transition: border-color 0.3s;
+  box-sizing: border-box;
+}
+
+.input-group input:focus {
+  outline: none;
+  border-color: #E4002B;
+}
+
+
+/* =====================================================
+   RÉSULTATS POUVOIR D'ACHAT
+===================================================== */
+
+/* Conteneur des résultats avec fond blanc */
+#pouvoir-achat-results {
+  background: white;
+  border-top: 3px solid #E4002B;
+  box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+  transition: all 0.3s;
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+#pouvoir-achat-results.hidden {
+  display: none;
+}
+
+.pouvoir-achat-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 30px;
+  background: #f9f9f9;
+  border-bottom: 1px solid #e0e0e0;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.pouvoir-achat-header h2 {
+  margin: 0;
+  font-size: 1.4em;
+  color: #333;
+  font-weight: 700;
+  flex: 1;
+  min-width: 250px;
+}
+
+/* Affichage du budget utilisé pour l'analyse */
+.budget-display {
+  margin: 0;
+  font-size: 1em;
+  color: #E4002B;
+  font-weight: 700;
+}
+
+#budget-display-value {
+  font-size: 1.3em;
+}
+
+/* Contenu du tableau avec fond blanc pour lisibilité */
+#pouvoir-achat-content {
+  padding: 30px;
+  background: white;
+}
+
+#pouvoir-achat-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+#pouvoir-achat-table th,
+#pouvoir-achat-table td {
+  padding: 15px 12px;
+  text-align: left;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+#pouvoir-achat-table th {
+  background: #f5f5f5;
+  font-weight: 600;
+  font-size: 1em;
+  color: #333;
+}
+
+#pouvoir-achat-table td {
+  font-size: 1em;
+  color: #333;
+}
+
+/* Colonne rang : centrée */
+#pouvoir-achat-table td:first-child {
+  text-align: center;
+  width: 80px;
+}
+
+/* Colonne nom de commune : en gras */
+#pouvoir-achat-table td:nth-child(2) {
+  font-weight: 600;
+  color: #333;
+}
+
+/* Colonne surface : en gros et rouge SeLoger, centrée */
+#pouvoir-achat-table td:nth-child(3) {
+  font-size: 1.2em;
+  font-weight: 700;
+  color: #E4002B;
+  text-align: center;
+}
+
+/* Badge de rang avec couleur selon la position */
+.rank-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  font-weight: 700;
+  font-size: 1.2em;
+  color: white;
+}
+
+/* Rang 1 : médaille d'or */
+.rank-badge.rank-1 {
+  background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+  box-shadow: 0 2px 8px rgba(255, 215, 0, 0.4);
+}
+
+/* Rang 2 : médaille d'argent */
+.rank-badge.rank-2 {
+  background: linear-gradient(135deg, #C0C0C0 0%, #A8A8A8 100%);
+  box-shadow: 0 2px 8px rgba(192, 192, 192, 0.4);
+}
+
+/* Rang 3 : médaille de bronze */
+.rank-badge.rank-3 {
+  background: linear-gradient(135deg, #CD7F32 0%, #B8722E 100%);
+  box-shadow: 0 2px 8px rgba(205, 127, 50, 0.4);
+}
+
+/* Rangs 4 et 5 : badge rouge SeLoger */
+.rank-badge.rank-4,
+.rank-badge.rank-5 {
+  background: linear-gradient(135deg, #E4002B 0%, #C9002B 100%);
+  box-shadow: 0 2px 8px rgba(228, 0, 43, 0.4);
+}
+
+/* Effet de survol sur les lignes du tableau */
+#pouvoir-achat-table tr:hover {
+  background: #fff5f6;
+}
+
+
+/* =====================================================
+   RESPONSIVE
+===================================================== */
+
+@media (max-width: 1400px) {
+  #comparison-panel {
+    width: 380px;
+    font-size: 0.9em;
+  }
+}
+
+@media (max-width: 1200px) {
+  #comparison-panel {
+    width: 350px;
+    font-size: 0.85em;
+  }
 }

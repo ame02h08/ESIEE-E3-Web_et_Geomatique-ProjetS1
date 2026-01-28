@@ -10,8 +10,11 @@ import {
 import { loadTransports, loadStops } from "./models/transport.model.js";
 import { startApp } from "./controllers/map.controller.js";
 import { initUI } from "./controllers/ui.controller.js";
+import { initFilterControls } from "./controllers/filter.controller.js";
+import { initComparisonPanel, initComparisonModeButton } from "./controllers/comparison.controller.js";
+import { initPouvoirAchatButton, initPouvoirAchatModal } from "./controllers/pouvoir-achat.controller.js"; // 🆕 AJOUT
 
-//async : point d’entrée de l’application.
+//async : point d'entrée de l'application.
 (async () => {
 
   /* =====================================================
@@ -40,11 +43,13 @@ import { initUI } from "./controllers/ui.controller.js";
   // Calcul des prix médians pour chaque section cadastrale.
   state.data.prixSection = aggregateMedianByKey(state.data.dvf, "section");
 
-  // Construction d’indexes utiles :
+  // Construction d'indexes utiles :
+  // - ventesByDept["75"] = [... ventes ...] 
   // - ventesByCommune["75056"] = [... ventes ...]
   // - ventesBySection["75056-AB"] = [... ventes ...]
-  const { ventesByCommune, ventesBySection } = buildIndexes(state.data.dvf);
+  const { ventesByDept, ventesByCommune, ventesBySection } = buildIndexes(state.data.dvf);
 
+  state.data.ventesByDept = ventesByDept; 
   state.data.ventesByCommune = ventesByCommune;
   state.data.ventesBySection = ventesBySection;
 
@@ -76,5 +81,20 @@ import { initUI } from "./controllers/ui.controller.js";
 
   // Activation des boutons UI (toggle transport, zoom, reset, etc.).
   initUI();
+
+  // Initialisation des contrôles de filtrage
+  initFilterControls();
+
+  // Initialisation du panneau de comparaison
+  initComparisonPanel();
+
+  // Initialisation du bouton Mode Comparaison
+  initComparisonModeButton();
+
+  //  Initialisation du bouton Pouvoir d'achat
+  initPouvoirAchatButton();
+  
+  // Initialisation du modal Pouvoir d'achat
+  initPouvoirAchatModal();
 
 })();
