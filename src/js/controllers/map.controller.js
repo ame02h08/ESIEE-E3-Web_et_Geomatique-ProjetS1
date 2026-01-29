@@ -174,7 +174,7 @@ async function onCommuneClick(codeDept, feature, layer) {
  * 
  * Lorsque l'utilisateur clique sur une section, cette fonction :
  * - Récupère les ventes de la section et calcule les stats filtrées
- * - Calcule le score de compatibilité avec les filtres actifs
+ * - PAS DE CALCUL DE COMPATIBILITÉ (non pertinent à ce niveau de détail)
  * - Vérifie si le mode comparaison est actif
  * - Si mode normal : affiche le panneau avec le détail des ventes
  * - Si mode comparaison : ajoute la section à la liste de comparaison
@@ -189,8 +189,11 @@ function onSectionClick(nomCommune, feature, layer) {
   const ventes = state.data.ventesBySection.get(feature.properties.id) ?? [];
   const transports = getTransportsServingZone(feature) || [];
   const statsFiltered = getFilteredStats(ventes, transports);
-  // Calcul du score de compatibilité pour cette section
-  const compatibility = calculateCompatibilityScore(ventes, transports);
+  
+  // ===== PAS DE COMPATIBILITÉ POUR LES SECTIONS =====
+  // Les sections sont trop granulaires pour que le score de compatibilité
+  // soit pertinent pour l'utilisateur. On passe null au panneau.
+  const compatibility = null;
 
   // Si le mode comparaison est actif, ajouter la section à la liste
   if (checkComparisonMode()) {
@@ -215,12 +218,13 @@ function onSectionClick(nomCommune, feature, layer) {
   state.map.fitBounds(bounds, { padding: [20, 20] });
 
   // Affichage du panneau latéral avec le détail des ventes
+  // ===== On passe null pour la compatibilité =====
   Panel.showSectionPanel(
     nomCommune,
     feature.properties.code,
     statsFiltered.ventesFiltered,
     transports,
-    compatibility
+    null // ici PAS DE SCORE DE COMPATIBILITÉ
   );
 }
 
