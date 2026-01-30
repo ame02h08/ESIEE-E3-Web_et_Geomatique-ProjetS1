@@ -58,7 +58,6 @@ import { initPouvoirAchatButton, initPouvoirAchatModal } from "./controllers/pou
 
   // Chargement des lignes RER, Tram, Metro, etc.
   state.data.transports = await loadTransports();
-   console.log("state.data.transports", state.data.transports);
   // Chargement des arrêts / stations / gares.
   state.data.stops = await loadStops();
 
