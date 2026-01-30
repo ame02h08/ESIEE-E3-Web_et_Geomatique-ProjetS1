@@ -22,7 +22,6 @@ export async function startApp() {
     state.data.statsDept,
     onDepartmentClick,
   );
-  console.log("aby : state.map", state.data.statsDept);
 }
 
 /**

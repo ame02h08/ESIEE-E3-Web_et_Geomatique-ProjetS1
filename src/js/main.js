@@ -36,10 +36,8 @@ import { initPouvoirAchatButton, initPouvoirAchatModal } from "./controllers/pou
   // Calcul de statistiques par département
   // (nb ventes, médian, typologie, etc.).
   state.data.statsDept = computeStatsByDept(state.data.dvf);
-
   // Calcul des prix médians pour chaque commune (heatmap).
   state.data.prixCommune = aggregateMedianByKey(state.data.dvf, "commune");
-
   // Calcul des prix médians pour chaque section cadastrale.
   state.data.prixSection = aggregateMedianByKey(state.data.dvf, "section");
 
@@ -60,7 +58,7 @@ import { initPouvoirAchatButton, initPouvoirAchatModal } from "./controllers/pou
 
   // Chargement des lignes RER, Tram, Metro, etc.
   state.data.transports = await loadTransports();
-
+   console.log("state.data.transports", state.data.transports);
   // Chargement des arrêts / stations / gares.
   state.data.stops = await loadStops();
 

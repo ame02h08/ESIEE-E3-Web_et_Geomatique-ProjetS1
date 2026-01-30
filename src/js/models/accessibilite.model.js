@@ -1,119 +1,144 @@
-import booleanPointInPolygon from "https://cdn.jsdelivr.net/npm/@turf/boolean-point-in-polygon@6/+esm";
-import distance from "https://cdn.jsdelivr.net/npm/@turf/distance@6/+esm";
-import centroid from "https://cdn.jsdelivr.net/npm/@turf/centroid@6/+esm";
 import { state } from "../app/state.js";
 
 /**
  * Détermine quelles lignes de transport desservent un territoire donné.
  *
- * VERSION AMÉLIORÉE avec buffer de proximité
- * 
- * Un territoire est considéré comme "desservi" lorsqu'au moins une station
- * de transport est située :
- * 1. À l'intérieur de son périmètre géographique, OU
- * 2. À moins de 1 km du centre du territoire
+ * Un territoire est considéré comme desservi si une station est :
+ * 1) située dans le territoire, OU
+ * 2) située à moins de 1 km du centre du territoire.
  *
- * Cette approche plus permissive permet de capturer les stations situées
- * juste à la frontière des zones administratives.
- *
- * @param {GeoJSON.Feature} zoneFeature - Territoire sélectionné (feature GeoJSON).
- * @returns {Array<GeoJSON.Feature>} Liste de lignes de transport desservant ce territoire.
+ * @param {GeoJSON.Feature} zoneFeature - Territoire sélectionné.
+ * @returns {Array<GeoJSON.Feature>} Liste des lignes desservant la zone.
  */
 export function getTransportsServingZone(zoneFeature) {
-  // Géométrie du territoire sélectionné (polygone)
-  const zoneGeom = zoneFeature.geometry;
-  
-  // Calculer le centre de la zone pour la recherche par distance
-  const zoneCentroid = centroid(zoneFeature);
-  
-  // Récupération des stations et des lignes de transport chargées dans le state
-  const stops = state.data?.stops?.features || [];
-  const lines = state.data?.transports?.features || [];
+  const stations = state.data?.stops?.features || [];
+  const lignesTransport = state.data?.transports?.features || [];
+  const DISTANCE_MAX_M = 1000; // 1 km en mètres
 
-  // Distance maximale de recherche (en kilomètres)
-  const MAX_DISTANCE_KM = 1.0;
+  if (!zoneFeature?.geometry) return [];
+
+  // Centre approximatif du territoire (centre de la bbox Leaflet)
+  const coucheZone = L.geoJSON(zoneFeature);
+  const centreZone = coucheZone.getBounds().getCenter();
 
   /**
-   * Étape 1 : Repérer les lignes qui disposent d'au moins
-   * une station située dans ou près de la zone sélectionnée.
+   * Test si un point est dans le contour d'un polygone
+   * (algorithme ray casting)
    */
-  const keysInZone = new Set();
+  function pointDansContour(lng, lat, contourPolygone) {
+    let interieur = false;
 
-  for (const stop of stops) {
-    if (!stop || !stop.geometry) continue;
-    
-    // Vérification en 2 étapes :
-    // 1. Station dans le polygone ? (vérification exacte)
-    let isServing = booleanPointInPolygon(stop, zoneGeom);
-    
-    // 2. Si pas dans le polygone, vérifier la distance au centre
-    if (!isServing) {
-      try {
-        const dist = distance(stop, zoneCentroid, { units: 'kilometers' });
-        isServing = dist <= MAX_DISTANCE_KM;
-      } catch (e) {
-        // En cas d'erreur de calcul, on ignore cette station
-        continue;
-      }
+    for (
+      let i = 0, j = contourPolygone.length - 1;
+      i < contourPolygone.length;
+      j = i++
+    ) {
+      const xi = contourPolygone[i][0],
+        yi = contourPolygone[i][1];
+      const xj = contourPolygone[j][0],
+        yj = contourPolygone[j][1];
+
+      const coupe =
+        (yi > lat) !== (yj > lat) &&
+        lng < ((xj - xi) * (lat - yi)) / (yj - yi + 0.0) + xi;
+
+      if (coupe) interieur = !interieur;
     }
-    
-    // Si la station dessert la zone (dans ou proche)
-    if (isServing) {
-      const p = stop.properties || {};
-      const mode = (p.mode || "").toUpperCase();
-      const ligne = p.ligne;
-      
+
+    return interieur;
+  }
+
+  /**
+   * Test si un point appartient à une géométrie GeoJSON
+   */
+  function pointDansPolygoneGeoJSON(lng, lat, geometrie) {
+    if (!geometrie) return false;
+
+    if (geometrie.type === "Polygon") {
+      return pointDansContour(lng, lat, geometrie.coordinates[0]);
+    }
+
+    if (geometrie.type === "MultiPolygon") {
+      return geometrie.coordinates.some((poly) =>
+        pointDansContour(lng, lat, poly[0])
+      );
+    }
+
+    return false;
+  }
+
+  // Étape 1 : détecter les lignes présentes via les stations
+  const clesLignesDansZone = new Set();
+
+  for (const station of stations) {
+    if (!station?.geometry?.coordinates) continue;
+
+    const [lng, lat] = station.geometry.coordinates;
+    const positionStation = L.latLng(lat, lng);
+
+    // Station située dans la zone ?
+    let dessertZone = pointDansPolygoneGeoJSON(
+      lng,
+      lat,
+      zoneFeature.geometry
+    );
+
+    // Sinon, station proche du centre ?
+    if (!dessertZone) {
+      const distanceM = centreZone.distanceTo(positionStation);
+      dessertZone = distanceM <= DISTANCE_MAX_M;
+    }
+
+    if (dessertZone) {
+      const props = station.properties || {};
+      const mode = (props.mode || "").toUpperCase();
+      const ligne = props.ligne;
+
       if (!mode || !ligne) continue;
-      
-      keysInZone.add(`${mode}|${ligne}`);
+
+      clesLignesDansZone.add(`${mode}|${ligne}`);
     }
   }
 
-  // Si aucune station n'est trouvée → pas de desserte
-  if (keysInZone.size === 0) {
-    return [];
-  }
+  if (clesLignesDansZone.size === 0) return [];
 
-  /**
-   * Étape 2 : Associer chaque ligne détectée à sa couleur
-   */
-  const featuresOut = [];
-  const usedKeys = new Set();
+  // Étape 2 : récupérer les lignes correspondantes
+  const resultat = [];
+  const clesDejaAjoutees = new Set();
 
-  for (const line of lines) {
-    if (!line) continue;
-    
-    const p = line.properties || {};
-    const mode = (p.mode || "").toUpperCase();
-    const ligne = p.ligne;
-    
+  for (const ligneTransport of lignesTransport) {
+    if (!ligneTransport) continue;
+
+    const props = ligneTransport.properties || {};
+    const mode = (props.mode || "").toUpperCase();
+    const ligne = props.ligne;
+
     if (!mode || !ligne) continue;
 
-    const key = `${mode}|${ligne}`;
-    
-    if (!keysInZone.has(key) || usedKeys.has(key)) continue;
-    
-    usedKeys.add(key);
-    
-    featuresOut.push({
+    const cle = `${mode}|${ligne}`;
+
+    if (!clesLignesDansZone.has(cle) || clesDejaAjoutees.has(cle)) continue;
+
+    clesDejaAjoutees.add(cle);
+
+    resultat.push({
       type: "Feature",
       geometry: null,
       properties: {
         mode,
         ligne,
-        couleur: p.couleur || "#999999",
+        couleur: props.couleur || "#999999",
       },
     });
   }
 
-  /**
-   * Étape 3 : Gestion des lignes sans couleur
-   */
-  for (const key of keysInZone) {
-    if (usedKeys.has(key)) continue;
-    const [mode, ligne] = key.split("|");
+  // Étape 3 : ajouter lignes manquantes sans couleur connue
+  for (const cle of clesLignesDansZone) {
+    if (clesDejaAjoutees.has(cle)) continue;
 
-    featuresOut.push({
+    const [mode, ligne] = cle.split("|");
+
+    resultat.push({
       type: "Feature",
       geometry: null,
       properties: {
@@ -124,5 +149,5 @@ export function getTransportsServingZone(zoneFeature) {
     });
   }
 
-  return featuresOut;
+  return resultat;
 }

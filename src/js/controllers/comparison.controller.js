@@ -86,8 +86,6 @@ export function initComparisonModeButton() {
       btn.classList.remove('active');
       statusSpan.textContent = 'OFF';
     }
-
-    console.log(`Mode Comparaison: ${isActive ? 'ACTIVÉ' : 'DÉSACTIVÉ'}`);
   });
 }
 

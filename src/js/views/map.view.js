@@ -232,33 +232,6 @@ export function renderCommunes(map, geo, prixCommune, onCommuneClick) {
 }
 
 /**
- * Vérifie si une section respecte les filtres actifs.
- *
- * @param {GeoJSON.Feature} feature - Feature de la section
- * @param {number} prix - Prix médian au m² de la section
- * @returns {boolean} - true si la section respecte les filtres
- */
-function sectionMatchesFilters(feature, prix) {
-  const filters = getFilters();
-
-  if (filters.budget !== null) {
-    const estimatedPrice = prix * 60;
-    if (estimatedPrice > filters.budget) {
-      return false;
-    }
-  }
-
-  if (filters.transport) {
-    const transports = getTransportsServingZone(feature) || [];
-    if (transports.length === 0) {
-      return false;
-    }
-  }
-
-  return true;
-}
-
-/**
  * Affiche les **sections cadastrales** d'une commune.
  *
  * Gradient de PRIX par défaut, gradient de COMPATIBILITÉ seulement si filtres actifs
